@@ -28,8 +28,7 @@ Resources:
           Statement:
             - Sid: PublicReadForGetBucketObjects
               Effect: Allow
-              Principal:
-                AWS: !Sub "arn:aws:iam::cloudfront:user/CloudFront Origin Access Identity ${SiteBucketOriginOAI}"
+              Principal: "*"
               Action: "s3:GetObject"
               Resource: !Sub "arn:aws:s3:::${SiteBucket}/*"
               Condition:
