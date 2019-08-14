@@ -1,0 +1,76 @@
+AWSTemplateFormatVersion: 2010-09-09
+Description: Review site for Arizona Bootstrap
+Parameters:
+  SiteCert:
+    Type: String
+    Description: The ARN of the certificate uploaded to ACM in us-east-1
+  SiteDomain:
+    Type: String
+    Description: The domain for the Arizona Digital review sites
+  SiteTTL:
+    Type: Number
+    Default: 3600
+    Description: The defualt TTL for the cloudfront distribution
+Resources:
+  SiteBucket:
+    Type: AWS::S3::Bucket
+    Properties:
+      WebsiteConfiguration:
+        IndexDocument: index.html
+        ErrorDocument: error.html
+
+  SiteBucketPolicy:
+    Type: AWS::S3::BucketPolicy
+    Properties:
+        PolicyDocument:
+          Id: SiteBucketOriginPolicy
+          Version: 2012-10-17
+          Statement:
+            - Sid: PublicReadForGetBucketObjects
+              Effect: Allow
+              Principal:
+                AWS: !Sub "arn:aws:iam::cloudfront:user/CloudFront Origin Access Identity ${SiteBucketOriginOAI}"
+              Action: "s3:GetObject"
+              Resource: !Sub "arn:aws:s3:::${SiteBucket}/*"
+              Condition:
+                StringEquals:
+                  aws:UserAgent: 2hGT5R6jjFw0gBqStBsS6f8CVXOpSngC5QFWEEgsSefIwVbH8Oo50wOj
+        Bucket: !Ref SiteBucket
+
+  SiteBucketOriginOAI:
+    Type: AWS::CloudFront::CloudFrontOriginAccessIdentity
+    Properties:
+      CloudFrontOriginAccessIdentityConfig:
+        Comment: "SiteBucketOriginOAI"
+
+  SiteDistribution:
+    Type: AWS::CloudFront::Distribution
+    Properties:
+      DistributionConfig:
+        DefaultRootObject: index.html
+        Aliases:
+          - !Ref SiteDomain
+        Enabled: "true"
+        PriceClass: PriceClass_All
+        HttpVersion: http2
+        ViewerCertificate:
+          AcmCertificateArn: !Ref SiteCert
+          SslSupportMethod: sni-only
+          MinimumProtocolVersion: TLSv1.2_2018
+        Origins:
+          - DomainName: !Sub "${SiteBucket}.s3-website-${AWS::Region}.amazonaws.com"
+            Id: SiteBucketOrigin
+            CustomOriginConfig:
+              OriginProtocolPolicy: http-only
+            OriginCustomHeaders:
+              - HeaderName: User-Agent
+                HeaderValue: 2hGT5R6jjFw0gBqStBsS6f8CVXOpSngC5QFWEEgsSefIwVbH8Oo50wOj
+        DefaultCacheBehavior:
+          DefaultTTL: !Ref SiteTTL
+          Compress: "true"
+          TargetOriginId: SiteBucketOrigin
+          ForwardedValues:
+            QueryString: "false"
+            Cookies:
+              Forward: none
+          ViewerProtocolPolicy: redirect-to-https
