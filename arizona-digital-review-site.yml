@@ -1,5 +1,5 @@
 AWSTemplateFormatVersion: 2010-09-09
-Description: Review site for Arizona Bootstrap
+Description: Review site for Arizona Digital
 Parameters:
   SiteCert:
     Type: String

@@ -1,4 +1,4 @@
-# Arizona Bootstrap Review Site
+# Arizona Digital Review Site
 
 This repository contains the CloudFormation template to deploy the infrastructure
 required to host the Arizona Digital review site over HTTPS.
