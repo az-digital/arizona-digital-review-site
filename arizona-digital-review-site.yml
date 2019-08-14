@@ -42,6 +42,36 @@ Resources:
       CloudFrontOriginAccessIdentityConfig:
         Comment: "SiteBucketOriginOAI"
 
+  ReviewSiteGroup:
+    Type: AWS::IAM::Group
+
+  ReviewSitePolicy:
+    Type: AWS::IAM::Policy
+    Properties:
+      PolicyName: "ArizonaDigitalReviewSitePolicy"
+      PolicyDocument:
+        Version: 2012-10-17
+        Statement:
+          -
+            Effect: "Allow"
+            Action:
+              - "s3:GetObject"
+              - "s3:PutObject"
+              - "s3:DeleteObject"
+            Resource: !Sub "arn:aws:s3:::${SiteBucket}/*"
+          -
+            Effect: "Allow"
+            Action:
+              - "s3:ListBucket"
+            Resource: !Sub "arn:aws:s3:::${SiteBucket}"
+          -
+            Effect: "Allow"
+            Action:
+              - "cloudfront:CreateInvalidation"
+            Resource: "*"
+      Groups:
+        - !Ref ReviewSiteGroup
+
   SiteDistribution:
     Type: AWS::CloudFront::Distribution
     Properties:
