@@ -1,6 +1,9 @@
 AWSTemplateFormatVersion: 2010-09-09
 Description: Review site for Arizona Digital
 Parameters:
+  CDNBucket:
+      Type: String
+      Description: The name of the CDN S3 bucket
   SiteCert:
     Type: String
     Description: The ARN of the certificate uploaded to ACM in us-east-1
@@ -58,12 +61,16 @@ Resources:
               - "s3:GetObject"
               - "s3:PutObject"
               - "s3:DeleteObject"
-            Resource: !Sub "arn:aws:s3:::${SiteBucket}/*"
+            Resource:
+              - !Sub "arn:aws:s3:::${SiteBucket}/*"
+              - !Sub "arn:aws:s3:::${CDNBucket}/*"
           -
             Effect: "Allow"
             Action:
               - "s3:ListBucket"
-            Resource: !Sub "arn:aws:s3:::${SiteBucket}"
+            Resource:
+              - !Sub "arn:aws:s3:::${SiteBucket}"
+              - !Sub "arn:aws:s3:::${CDNBucket}"
           -
             Effect: "Allow"
             Action:
